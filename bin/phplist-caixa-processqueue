@@ -1,0 +1,5 @@
+#!/bin/bash
+
+php /var/www/phplist/public_html/lists/admin/index.php -p processqueue -C /var/www/phplist/public_html/lists/config/config.php > /var/log/phplist_fila.log
+
+# Agendamento Padrão : 0-59/5 * * * * 

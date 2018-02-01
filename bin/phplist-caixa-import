@@ -1,0 +1,6 @@
+#!/bin/bash
+
+GET_ALL_MODALITY_NUMBERS='/var/www/phplist/bin/phplist -m phplistCaixaFunctionality -p processGetAllModalityNumbers'
+IMPORT_BY_MODALITY_NUMBER='/var/www/phplist/bin/phplist -m phplistCaixaFunctionality -p processImportByModalityNumber -n'
+
+${GET_ALL_MODALITY_NUMBERS} | xargs -n 1 -P 3 ${IMPORT_BY_MODALITY_NUMBER}

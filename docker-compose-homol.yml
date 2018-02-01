@@ -1,0 +1,54 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - data_db:/var/lib/mysql
+    env_file:
+      - build/docker-stack.env
+
+  postgresql:
+    image: localhost:5000/postgres-caixa
+    volumes:
+      - data_postgres_db:/var/lib/postgresql/data
+    env_file:
+      - build/docker-stack.env
+  
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+
+  cache:
+    image: memcached
+
+  phplist:
+    depends_on:
+      - mysql
+      - mailhog
+      - cache
+    image: localhost:5000/phplist-caixa
+    ports:
+      - "80:80"
+    env_file:
+      - build/docker-stack.env
+    environment:
+      - SERVER_NAME=phplist-caixa.4linux.com.br
+    entrypoint:
+      - build/homol-init.sh
+
+  migration:
+    depends_on:
+      - mysql
+    image: localhost:5000/phplist-caixa
+    env_file:
+      - build/docker-stack.env
+    entrypoint:
+      - build/migration-init.sh
+
+volumes:
+  data_db:
+
+volumes:
+  data_db:
+  data_postgres_db:

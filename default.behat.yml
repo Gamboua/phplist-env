@@ -1,0 +1,11 @@
+default:
+  extensions:
+    Behat\MinkExtension\Extension:
+      goutte:    ~
+      selenium2: ~
+      # Change to you custom url
+      base_url: http://{{SERVER_NAME}}
+  context :
+     parameters :
+          user: xyz
+          password : abc

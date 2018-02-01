@@ -1,0 +1,48 @@
+---
+- hosts: local
+  vars:
+    mount: "{{ ansible_mounts | selectattr('mount','equalto','/') | list | first }}"
+
+  pre_tasks:
+    - name: Valida se espaço livre e maior que 15%
+      assert:
+        that:
+          - mount.size_available > mount.size_total|float * 0.15
+      register: disk
+
+    - name: Limpa docker caso tenha estourado o espaco
+      command: yes 'y' | docker system prune -a
+      when: disk.failed == true
+
+    - name: Valida se porta esta disponivel
+      wait_for: state=stopped port="{{ item }}" delay=1 timeout=5
+      with_items:
+        - 80
+        - 8025
+        - 1025
+      register: ports
+      ignore_errors: yes
+      
+    - name: Interrompe playbook se alguma das portas estiverem em uso
+      fail:
+        msg: "Portas ocupadas"
+      when: ports.failed is defined
+
+  tasks:
+    - name: Constroi a imagem phplist
+      command: docker build -t localhost:5000/phplist-caixa --file build/Dockerfile .
+    
+    - name: Constroi a imagem para postgresql
+      command: docker build -t localhost:5000/postgres-caixa --file build/Dockerfile-postgresql .
+
+    - name: Sobe stack com aplicações
+      command: docker stack deploy --compose-file docker-compose-homol.yml phplist-caixa-{{ ansible_env.BUILD_NUMBER_POST }}
+
+  post_tasks:
+    - name: Aguarda porta 80 ficar disponivel
+      wait_for: port=80 delay=1 state=started
+
+    - name: Remove stack do servidor
+      command: docker stack rm phplist-caixa-{{ ansible_env.BUILD_NUMBER_POST }}
+      tags:
+        - always

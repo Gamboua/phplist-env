@@ -1,0 +1,15 @@
+vendor/
+composer.phar
+public_html/lists/config/config.php
+behat.yml
+phinx.yml
+migration.log
+.project
+.buildpath
+.settings
+*.retry
+deployment.properties
+deployment.xml
+
+# phpStorm IDE
+.idea
